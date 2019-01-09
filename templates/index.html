@@ -9,7 +9,7 @@
 <body>
 
 <div class="centered">
-    <canvas id="canvas" width="280" height="280"></canvas>
+    <canvas id="canvas" width="660" height="280"></canvas>
 </div>
 
 <div class="centered">
@@ -42,8 +42,8 @@
             url: window.location.href + "predict",
             data: img,
             success: function (data) {
-                $('#result').text('Predicted Output: ' + data.prediction);
-                $('#confidence').text('Confidence: ' + data.confidence + '%');
+                {#$('#result').text('Predicted Output: ' + data.prediction);#}
+                {#$('#confidence').text('Confidence: ' + data.confidence + '%');#}
             }
         });
     });

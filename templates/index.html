@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Character Recognition</title>
+</head>
+<body>
+<div class="centered">
+    <h1 style="margin-top:70px">Interactive Character Recognition</h1>
+</div>
+<div class="centered">
+    <canvas id="canvas" width="660" height="280"></canvas>
+</div>
+
+<div class="centered" style="width:668px;height: 60pxpx; margin:auto">
+    <div style="width: 270px; display: inline">
+        <button type="button" class="btn btn-secondary" id="pen" value="Pen" disabled><i class="fas fa-paint-brush"></i> Pen</button>
+        <button type="button" class="btn btn-secondary" id="eraser" value="Eraser"><i class="fas fa-eraser"></i> Eraser</button></button>
+        <button type="button" id="clear_button" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Clear</button>
+    </div>
+    <div style="margin-left: 250px; display: inline">
+        <button type="button" class="btn btn-success predict_button" style="width: 150px;">Predict</button>
+    </div>
+</div>
+
+<div class="centered">
+    <h1 id="result" style="margin-top:10px"></h1>
+</div>
+<br><br>
+<div class="centered">
+    <h1 id="confidence"></h1>
+</div>
+<script src="{{ url_for('static',filename='jquery-3.3.1.min.js') }}"></script>
+<script src="https://use.fontawesome.com/releases/v5.6.3/js/all.js" data-auto-replace-svg="nest"></script>
+<script src="{{ url_for('static',filename='static.js') }}"></script>
+<script type="text/javascript">
+    $(".predict_button").click(function () {
+        $('#result').text('Calculating prediction..');
+        $('#confidence').text('');
+        var canvasObj = document.getElementById("canvas");
+        var img = canvasObj.toDataURL('image/png');
+        $.ajax({
+            type: "POST",
+            url: window.location.href + "predict",
+            data: img,
+            success: function (data) {
+                $('#result').text('Predicted Output: ' + data.prediction);
+                $('#confidence').text('Average Confidence: ' + data.confidence + '%');
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,4 +1,7 @@
-from keras.layers import Conv2D, MaxPooling2D, Convolution2D, Dropout, Dense, Flatten
+# This is the file to train CNN using EMNIST dataset.
+# Run this file first if you haven't had any model in your computer.
+
+from keras.layers import MaxPooling2D, Convolution2D, Dropout, Dense, Flatten
 from keras.models import Sequential, save_model
 from keras.utils import np_utils
 from scipy.io import loadmat
@@ -6,27 +9,26 @@ import pickle
 import keras
 import numpy as np
 
-def load_data(width=28, height=28, max_=None, verbose=True):
-    # Local functions
+def load_dataset(width=28, height=28, max_=None, verbose=True):
     def rotate(img):
         # Used to rotate images (for some reason they are transposed on read-in)
         flipped = np.fliplr(img)
         return np.rot90(flipped)
 
-    # Load convoluted list structure form loadmat
+    # Load EMNIST Balanced dataset. You can change to other MNIST's dataset
     mat = loadmat('samples/emnist-balanced.mat')
 
     # Load char mapping
     mapping = {kv[0]:kv[1:][0] for kv in mat['dataset'][0][0][2]}
     pickle.dump(mapping, open('bin/mapping.p', 'wb'))
 
-    # Load training data
+    # Load training data (85% = 112800 in total)
     if max_ == None:
         max_ = len(mat['dataset'][0][0][0][0][0][0])
     training_images = mat['dataset'][0][0][0][0][0][0][:max_].reshape(max_, height, width, 1)
     training_labels = mat['dataset'][0][0][0][0][0][1][:max_]
 
-    # Load testing data
+    # Load testing data (15% = 18800 in total)
     if max_ == None:
         max_ = len(mat['dataset'][0][0][1][0][0][0])
     else:
@@ -60,7 +62,7 @@ def load_data(width=28, height=28, max_=None, verbose=True):
 
     return ((training_images, training_labels), (testing_images, testing_labels), mapping, nb_classes)
 
-def build_net(training_data, width=28, height=28, verbose=False):
+def build_network(training_data, width=28, height=28, verbose=False):
     # Initialize data
     (x_train, y_train), (x_test, y_test), mapping, nb_classes = training_data
     input_shape = (height, width, 1)
@@ -71,26 +73,16 @@ def build_net(training_data, width=28, height=28, verbose=False):
     kernel_size = (3, 3) # convolution kernel size
 
     model = Sequential()
-    model.add(Convolution2D(nb_filters,
-                            kernel_size,
-                            padding='valid',
-                            input_shape=input_shape,
-                            activation='relu'))
-    model.add(Convolution2D(nb_filters,
-                            kernel_size,
-                            activation='relu'))
-
+    model.add(Convolution2D(nb_filters,kernel_size,padding='valid',input_shape=input_shape,activation='relu'))
+    model.add(Convolution2D(nb_filters,kernel_size,activation='relu'))
     model.add(MaxPooling2D(pool_size=pool_size))
     model.add(Dropout(0.25))
     model.add(Flatten())
-
     model.add(Dense(512, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(nb_classes, activation='softmax'))
 
-    model.compile(loss='categorical_crossentropy',
-                  optimizer='adadelta',
-                  metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
 
     if verbose == True: print(model.summary())
     return model
@@ -119,11 +111,11 @@ def train(model, training_data, callback=True, batch_size=256, epochs=10):
 
     # Offload model to file
     model_yaml = model.to_yaml()
-    with open("bin/model.yaml", "w") as yaml_file:
-        yaml_file.write(model_yaml)
-    save_model(model, 'bin/model.h5')
+    with open("bin/model.yaml", "w") as yaml_file: # model file
+        yaml_file.write(model_yaml) #
+    save_model(model, 'bin/model.h5') # weight file
 
 if __name__ == '__main__':
-    training_data = load_data()
-    model = build_net(training_data)
+    training_data = load_dataset()
+    model = build_network(training_data)
     train(model, training_data, epochs=10)

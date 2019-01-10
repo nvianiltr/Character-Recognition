@@ -1,7 +1,7 @@
 (function() {
 	var canvas = document.querySelector("#canvas");
 	var context = canvas.getContext("2d");
-	canvas.width = 280;
+	canvas.width = 660;
 	canvas.height = 280;
 
 	var loc = {x:0, y:0};
